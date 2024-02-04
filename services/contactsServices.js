@@ -2,7 +2,7 @@
 import { promises as fs } from "fs";
 import contact from '../db/contact.js'
 
-// const contactsPath = path.join("db", "contact.js");
+
 async function listContacts() {
   const data = await contact.find()
   return data
@@ -38,9 +38,3 @@ export default {
   updateById,
 };
 
-// module.exports = {
-//   addContact,
-//   removeContact,
-//   getContactById,
-//   listContacts,
-// };
