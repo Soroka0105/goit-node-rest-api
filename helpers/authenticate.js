@@ -5,7 +5,7 @@ import User from './../db/user.js';
 const {SECRET_KEY} = process.env
 
 export const authenticate = async (req, res, next) => {
-const {authorization = ""} = req.body
+const {authorization = ""} = req.headers
 const [bearer, token] = authorization.split(" ")
 if (bearer !== "Bearer") {
     next(HttpError(401))
@@ -15,11 +15,11 @@ try {
     const user = await User.findById(id)
 
     if (!user) {
-        next(HttpError(401))
+        next(HttpError(401, "user not found"))
     }
     next()
-} catch (error) {
-    next(HttpError(401))
+} catch  {
+    next(HttpError(401, "shlyapa "))
 }
 
 }
