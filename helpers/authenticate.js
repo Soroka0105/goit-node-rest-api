@@ -19,7 +19,7 @@ try {
     }
     next()
 } catch  {
-    next(HttpError(401, "shlyapa "))
+    next(HttpError(401))
 }
 
 }
