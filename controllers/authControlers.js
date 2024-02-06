@@ -45,7 +45,7 @@ export const login = async (req, res, next) => {
     try {
         const {email, password} = req.body 
         const user = await User.findOne({email})
-
+        
         if (!user) {
             throw HttpError(401, "Email or password invalid")
         }
@@ -58,7 +58,8 @@ export const login = async (req, res, next) => {
         const payload = {
             id:user._id,
         }
-        const token = jwt.sign(payload, SECRET_KEY, {expiresIn:"23h"})
+        const token = jwt.sign(payload, SECRET_KEY, {expiresIn:"23h"});
+        await User.findByIdAndUpdate(user._id, {token})
 
         res.json({
             token,
@@ -69,4 +70,24 @@ export const login = async (req, res, next) => {
     }
     
     
+}
+
+export const getCurrent = async (req, res, next) => {
+    const {email, _id} = req.user
+
+    res.json({
+        email,
+        _id,
+    })
+
+}
+
+export const logout = async (req, res, next) => {
+    const {_id} = req.user;
+    await User.findByIdAndUpdate(_id, {token: ""})
+    res.json({
+        message: "Logout success"
+    })
+
+
 }

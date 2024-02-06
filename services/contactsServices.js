@@ -2,8 +2,8 @@
 import contact from '../db/contact.js'
 
 
-async function listContacts() {
-  const data = await contact.find()
+async function listContacts(owner) {
+  const data = await contact.find(owner).populate("owner", "name email")
   return data
 }
 
