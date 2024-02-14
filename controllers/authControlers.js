@@ -4,12 +4,21 @@ import bcrypt from "bcrypt";
 import HttpError from "../helpers/HttpError.js";
 import jwt from 'jsonwebtoken';
 import handleMongooseError from "../helpers/handleMongooseError.js"
+import gravatar from "gravatar"
+import path from 'path'
+import Jimp from "jimp";
+import * as url from 'url';
+    const __filename = url.fileURLToPath(import.meta.url);
+    const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
 import {
     registerSchema,
     loginSchema
 } from "../schemas/userSchemas.js"
+import fs from "fs/promises"
 
 const {SECRET_KEY} = process.env
+
+const avatarsDir = path.join(__dirname, "../", "public", "avatars")
 
 export const register = async (req, res, next) => {
 try {
@@ -25,8 +34,9 @@ try {
         throw HttpError(409, "email already in use")
     }
     const hashPassword = await bcrypt.hash(password, 10)
+    const avatarURL = gravatar.url(email)
 
-    const newUser = await User.create({...req.body, password: hashPassword})
+    const newUser = await User.create({...req.body, password: hashPassword, avatarURL})
 
 res.status(201).json({
     password: newUser.password,
@@ -89,5 +99,25 @@ export const logout = async (req, res, next) => {
         message: "Logout success"
     })
 
+
+}
+
+export const updateAvatar = async (req, res, next) => {
+    const {_id} = req.user
+    const {path: tempUpload, originalname} = req.file
+    const filename = `${_id}_${originalname}`
+    const resultUpload = path.join(avatarsDir, filename)
+    await fs.rename(tempUpload, resultUpload)
+    const avatarURL = path.join("avatars", filename)
+
+    Jimp.read(avatarURL)
+    .then((image) => image.resize(250,250))
+    .catch((error) => console.log(error))
+    
+
+
+    await User.findByIdAndUpdate(_id, {avatarURL})
+
+    res.json({avatarURL,})
 
 }
